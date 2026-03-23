@@ -1,0 +1,16 @@
+{
+  "name": "policy-radar",
+  "version": "1.0.0",
+  "description": "Political signal monitoring for advisors — Danish Parliament",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "start:electron": "electron .",
+    "dev": "electron . --dev"
+  },
+  "dependencies": {
+    "electron": "^33.0.0",
+    "express": "^4.21.0",
+    "node-fetch": "^2.7.0"
+  }
+}
