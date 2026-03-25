@@ -75,9 +75,12 @@ body {
   position: relative;
   width: 430px;
   height: 880px;
+  min-width: 430px;
+  max-width: 430px;
   transform: scale(0.60);
   transform-origin: top center;
   background: #111111;
+  overflow: hidden;
   border-radius: 56px;
   padding: 16px;
   box-shadow:
@@ -1021,8 +1024,8 @@ body {
 /* ============================================
    SCREEN SECTIONS (page switching)
    ============================================ */
-.screen { display: none; }
-.screen.active { display: block; }
+.screen { display: none; width: 100%; box-sizing: border-box; }
+.screen.active { display: block; width: 100%; }
 
 /* ============================================
    PROFILE SCREEN
