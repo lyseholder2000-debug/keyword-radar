@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Core — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CORE DESIGN SYSTEM — DESIGN TOKENS
+   ============================================ */
+:root {
+  --color-primary: #3E7BFA;
+  --color-primary-hover: #2D6AE0;
+  --color-primary-pressed: #1F5ACC;
+  --color-primary-bg: rgba(62, 123, 250, 0.08);
+  --color-danger: #F45252;
+  --color-danger-bg: rgba(244, 82, 82, 0.08);
+  --color-success: #2ECC71;
+  --color-success-bg: rgba(46, 204, 113, 0.08);
+  --color-warning: #F5A623;
+  --color-warning-bg: rgba(245, 166, 35, 0.08);
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #6B7280;
+  --color-text-disabled: #B0B7C3;
+  --color-bg-page: #F7F8FA;
+  --color-bg-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 40px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --shadow-01: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-02: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-03: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-04: 0 8px 16px rgba(0, 0, 0, 0.10);
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  background: #E8EAED;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 16px;
+}
+
+/* ============================================
+   PHONE FRAME
+   ============================================ */
+.phone-frame {
+  position: relative;
+  width: 430px;
+  height: 880px;
+  background: #111111;
+  border-radius: 56px;
+  padding: 16px;
+  box-shadow:
+    0 0 0 2px #333,
+    0 0 0 4px #1a1a1a,
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Notch / Dynamic Island */
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 32px;
+  background: #111111;
+  border-radius: 20px;
+  z-index: 200;
+}
+
+/* Side button - power */
+.phone-frame::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 180px;
+  width: 4px;
+  height: 80px;
+  background: #222;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Volume buttons */
+.phone-volume {
+  position: absolute;
+  left: -4px;
+  width: 4px;
+  background: #222;
+  border-radius: 4px 0 0 4px;
+}
+
+.phone-volume--up {
+  top: 160px;
+  height: 40px;
+}
+
+.phone-volume--down {
+  top: 220px;
+  height: 40px;
+}
+
+.phone-volume--silent {
+  top: 120px;
+  height: 24px;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 42px;
+  overflow: hidden;
+  position: relative;
+  background: var(--color-bg-page);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status bar */
+.phone-status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px 0;
+  z-index: 150;
+  background: var(--color-bg-surface);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.phone-status-bar__time {
+  color: var(--color-text-primary);
+}
+
+.phone-status-bar__icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-primary);
+}
+
+/* Home indicator */
+.phone-home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: #1A1A2E;
+  border-radius: 3px;
+  opacity: 0.2;
+  z-index: 200;
+}
+
+/* ============================================
+   APP SHELL
+   ============================================ */
+.app {
+  width: 100%;
+  flex: 1;
+  background: var(--color-bg-page);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: 54px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar inside phone */
+.app::-webkit-scrollbar { width: 0; }
+
+/* ============================================
+   TOP BAR (Navigation — Level 03)
+   ============================================ */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-03);
+  position: sticky;
+  top: -1px;
+  z-index: 100;
+}
+
+.top-bar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.top-bar__logo svg { flex-shrink: 0; }
+
+.top-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background 200ms;
+  position: relative;
+}
+
+.icon-btn:hover { background: var(--color-primary-bg); }
+.icon-btn:active { background: rgba(62, 123, 250, 0.15); }
+
+.notification-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  border: 2px solid var(--color-bg-surface);
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+.content { padding: var(--space-3); }
+
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+}
+
+.section-gap { margin-bottom: var(--space-4); }
+
+/* ============================================
+   ALERT (Info variant)
+   ============================================ */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.5;
+  border-left: 3px solid;
+}
+
+.alert--info {
+  background: var(--color-primary-bg);
+  border-left-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+.alert--success {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+}
+
+.alert--warning {
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+}
+
+.alert__icon { flex-shrink: 0; margin-top: 1px; }
+.alert__text { flex: 1; }
+.alert__dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0;
+  line-height: 1;
+}
+
+/* ============================================
+   STAT CARDS (Dashboard)
+   ============================================ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.stat-card {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-01);
+}
+
+.stat-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.stat-card__value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.stat-card__change {
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: var(--space-1);
+}
+
+.stat-card__change--up { color: var(--color-success); }
+.stat-card__change--down { color: var(--color-danger); }
+
+.stat-card__bar {
+  margin-top: var(--space-2);
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.stat-card__bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+
+/* ============================================
+   PROGRESS CARD
+   ============================================ */
+.progress-card {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-01);
+}
+
+.progress-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.progress-card__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.progress-card__link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.progress-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.progress-item + .progress-item {
+  border-top: 1px solid var(--color-border);
+}
+
+.progress-item__label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.progress-item__value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+
+.progress-item__bar {
+  width: 80px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-item__bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.fill--primary { background: var(--color-primary); }
+.fill--success { background: var(--color-success); }
+.fill--danger { background: var(--color-danger); }
+.fill--warning { background: var(--color-warning); }
+
+/* ============================================
+   CONTENT CARDS (Feed)
+   ============================================ */
+.feed-card {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-01);
+  transition: box-shadow 200ms;
+}
+
+.feed-card:hover { box-shadow: var(--shadow-02); }
+
+.feed-card__image {
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-3);
+  position: relative;
+}
+
+.feed-card__image--alt {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.feed-card__badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: white;
+}
+
+.badge--insight { background: var(--color-primary); }
+.badge--blog { background: var(--color-success); }
+
+.feed-card__body { padding: var(--space-3); }
+
+.feed-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+  line-height: 1.3;
+}
+
+.feed-card__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+.feed-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feed-card__author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.feed-card__read {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ============================================
+   CHIPS
+   ============================================ */
+.chip-row {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  -webkit-overflow-scrolling: touch;
+}
+
+.chip-row::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 200ms;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.chip--active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+.form-group { margin-bottom: var(--space-3); }
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  outline: none;
+  transition: border-color 200ms;
+}
+
+.form-input::placeholder { color: var(--color-text-disabled); }
+.form-input:focus { border-color: var(--color-primary); }
+
+.form-input--icon {
+  padding-left: 44px;
+  background-repeat: no-repeat;
+  background-position: 16px center;
+  background-size: 18px;
+}
+
+.form-input--error {
+  border-color: var(--color-danger);
+}
+
+.form-assistive {
+  font-size: 12px;
+  margin-top: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.form-assistive--error { color: var(--color-danger); }
+.form-assistive--success { color: var(--color-success); }
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-disabled);
+  pointer-events: none;
+}
+
+.input-with-icon .form-input {
+  padding-left: 44px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-family);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms;
+  white-space: nowrap;
+}
+
+.btn--sm { height: 32px; padding: 0 var(--space-3); font-size: 13px; border-radius: var(--radius-md); }
+.btn--md { height: 40px; padding: 0 var(--space-4); font-size: 14px; border-radius: var(--radius-md); }
+.btn--lg { height: 48px; padding: 0 var(--space-5); font-size: 16px; border-radius: var(--radius-md); }
+.btn--full { width: 100%; }
+
+.btn--primary {
+  background: var(--color-primary);
+  color: white;
+}
+.btn--primary:hover { background: var(--color-primary-hover); }
+.btn--primary:active { background: var(--color-primary-pressed); }
+
+.btn--secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+.btn--secondary:hover { background: var(--color-primary-bg); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-primary);
+}
+.btn--ghost:hover { background: var(--color-primary-bg); }
+
+.btn--danger {
+  background: var(--color-danger);
+  color: white;
+}
+.btn--danger:hover { background: #e04343; }
+
+.btn--disabled {
+  background: var(--color-border);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   TOGGLE
+   ============================================ */
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+.toggle__track {
+  position: absolute;
+  inset: 0;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background 200ms;
+}
+
+.toggle__track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: var(--shadow-02);
+  transition: transform 200ms;
+}
+
+.toggle input:checked + .toggle__track {
+  background: var(--color-primary);
+}
+
+.toggle input:checked + .toggle__track::after {
+  transform: translateX(20px);
+}
+
+/* ============================================
+   SELECTION CONTROLS
+   ============================================ */
+.checkbox-label, .radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox-custom, .radio-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 200ms;
+}
+
+.checkbox-custom { border-radius: var(--radius-sm); }
+.radio-custom { border-radius: 50%; }
+
+.checkbox-label input, .radio-label input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-label input:checked + .checkbox-custom {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox-label input:checked + .checkbox-custom svg { display: block; }
+.checkbox-custom svg { display: none; }
+
+.radio-label input:checked + .radio-custom {
+  border-color: var(--color-primary);
+}
+
+.radio-label input:checked + .radio-custom::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge--info { background: var(--color-primary-bg); color: var(--color-primary); }
+.badge--success { background: var(--color-success-bg); color: var(--color-success); }
+.badge--warning { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge--danger { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* ============================================
+   LIST / SETTINGS
+   ============================================ */
+.settings-card {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-01);
+  overflow: hidden;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  min-height: 56px;
+}
+
+.settings-item + .settings-item {
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-item__icon--blue { background: var(--color-primary-bg); color: var(--color-primary); }
+.settings-item__icon--green { background: var(--color-success-bg); color: var(--color-success); }
+.settings-item__icon--orange { background: var(--color-warning-bg); color: var(--color-warning); }
+.settings-item__icon--red { background: var(--color-danger-bg); color: var(--color-danger); }
+
+.settings-item__content { flex: 1; min-width: 0; }
+
+.settings-item__title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.settings-item__desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 1px;
+}
+
+.settings-item__trail {
+  flex-shrink: 0;
+  color: var(--color-text-disabled);
+}
+
+/* ============================================
+   ACCORDION
+   ============================================ */
+.accordion {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-01);
+  overflow: hidden;
+}
+
+.accordion-item + .accordion-item {
+  border-top: 1px solid var(--color-border);
+}
+
+.accordion-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.accordion-trigger svg {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  transition: transform 200ms;
+}
+
+.accordion-trigger[aria-expanded="true"] {
+  font-weight: 600;
+}
+
+.accordion-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.accordion-panel {
+  padding: 0 var(--space-3) var(--space-3);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  display: none;
+}
+
+.accordion-panel.open { display: block; }
+
+/* ============================================
+   BOTTOM NAVIGATION (Level 03)
+   ============================================ */
+.bottom-nav {
+  flex-shrink: 0;
+  height: 72px;
+  background: var(--color-bg-surface);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  z-index: 100;
+  padding-top: 8px;
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: var(--space-2);
+  position: relative;
+  transition: color 200ms;
+}
+
+.bottom-nav__item--active {
+  color: var(--color-primary);
+}
+
+/* ============================================
+   TABS (underline style)
+   ============================================ */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-3);
+}
+
+.tab {
+  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  font-family: var(--font-family);
+  transition: color 200ms;
+}
+
+.tab--active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 1px;
+}
+
+/* ============================================
+   SCREEN SECTIONS (page switching)
+   ============================================ */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ============================================
+   PROFILE SCREEN
+   ============================================ */
+.profile-header {
+  text-align: center;
+  padding: var(--space-5) var(--space-3) var(--space-4);
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 auto var(--space-3);
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.profile-role {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-5);
+  margin-top: var(--space-3);
+}
+
+.profile-stat {
+  text-align: center;
+}
+
+.profile-stat__value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.profile-stat__label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+/* ============================================
+   SLIDER
+   ============================================ */
+.slider-group {
+  margin-bottom: var(--space-3);
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.slider-label { font-size: 14px; font-weight: 500; }
+.slider-value { font-size: 14px; font-weight: 600; color: var(--color-primary); }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 3px solid white;
+  box-shadow: var(--shadow-02);
+  cursor: pointer;
+}
+
+/* ============================================
+   SEARCH SCREEN
+   ============================================ */
+.search-box {
+  position: relative;
+  margin-bottom: var(--space-3);
+}
+
+.search-box .form-input {
+  padding-left: 44px;
+  padding-right: 44px;
+}
+
+.search-box__icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-disabled);
+}
+
+.search-box__clear {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-disabled);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   COMPACT LIST CARD (search results)
+   ============================================ */
+.list-card {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-01);
+  overflow: hidden;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.list-item + .list-item {
+  border-top: 1px solid var(--color-border);
+}
+
+.list-item__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.list-item__content { flex: 1; min-width: 0; }
+
+.list-item__title {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item__subtitle {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 1px;
+}
+
+.list-item__trail {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.list-item__trail-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.list-item__trail-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+/* ============================================
+   ICON GRID
+   ============================================ */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+}
+
+.icon-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-md);
+  transition: background 200ms;
+}
+
+.icon-cell:hover {
+  background: var(--color-primary-bg);
+}
+
+.icon-cell svg {
+  color: var(--color-text-primary);
+}
+
+.icon-cell span {
+  font-size: 9px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.icon-grid--status {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.icon-cell--info svg { color: var(--color-primary); }
+.icon-cell--warning svg { color: var(--color-warning); }
+.icon-cell--danger svg { color: var(--color-danger); }
+.icon-cell--success svg { color: var(--color-success); }
+
+.icon-grid--loaders {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.mt-4 { margin-top: var(--space-1); }
+.mt-8 { margin-top: var(--space-2); }
+.mt-16 { margin-top: var(--space-3); }
+.mt-24 { margin-top: var(--space-4); }
+.mb-16 { margin-bottom: var(--space-3); }
+.mb-24 { margin-bottom: var(--space-4); }
+.text-center { text-align: center; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="phone-volume phone-volume--silent"></div>
+  <div class="phone-volume phone-volume--up"></div>
+  <div class="phone-volume phone-volume--down"></div>
+  <div class="phone-screen">
+    <div class="phone-status-bar">
+      <span class="phone-status-bar__time">9:41</span>
+      <span class="phone-status-bar__icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="5" width="3" height="7" rx="0.5"/><rect x="4.5" y="3" width="3" height="9" rx="0.5"/><rect x="9" y="1" width="3" height="11" rx="0.5"/><rect x="13" y="0" width="3" height="12" rx="0.5" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4C5.6 2.4 3.4 3.3 1.8 4.8L0 3C2 1.1 4.9 0 8 0s6 1.1 8 3l-1.8 1.8C12.6 3.3 10.4 2.4 8 2.4z" opacity="0.3"/><path d="M8 4.8c-1.6 0-3 .6-4.2 1.6L2 4.6C3.6 3.2 5.7 2.4 8 2.4s4.4.8 6 2.2l-1.8 1.8C11 5.4 9.6 4.8 8 4.8z" opacity="0.5"/><path d="M8 7.2c-1 0-1.8.4-2.4 1L4 6.4C5.1 5.5 6.5 4.8 8 4.8s2.9.7 4 1.6l-1.6 1.8c-.6-.6-1.4-1-2.4-1z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="21" height="10" rx="2" stroke="currentColor" stroke-width="1" fill="none"/><rect x="22" y="3.5" width="2" height="5" rx="1" opacity="0.4"/><rect x="1.5" y="2.5" width="14" height="7" rx="1" fill="currentColor"/></svg>
+      </span>
+    </div>
+    <div class="app">
+
+  <!-- ==========================================
+       TOP BAR
+       ========================================== -->
+  <header class="top-bar">
+    <div class="top-bar__logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3E7BFA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+      Core
+    </div>
+    <div class="top-bar__actions">
+      <button class="icon-btn" aria-label="Search" onclick="showScreen('search')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notification-dot"></span>
+      </button>
+      <div class="avatar-sm">AF</div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       SCREEN: DASHBOARD (Home)
+       ========================================== -->
+  <div class="screen active" id="screen-home">
+    <div class="content">
+
+      <!-- Welcome -->
+      <div class="section-gap">
+        <p class="section-label">Dashboard</p>
+        <h1 class="section-title">Good morning, Anders</h1>
+      </div>
+
+      <!-- Info Alert -->
+      <div class="alert alert--info section-gap">
+        <span class="alert__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3E7BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </span>
+        <span class="alert__text">3 tasks are due today. Stay on track!</span>
+        <button class="alert__dismiss" aria-label="Dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-grid section-gap">
+        <div class="stat-card">
+          <p class="stat-card__label">Revenue</p>
+          <p class="stat-card__value">$12.4k</p>
+          <p class="stat-card__change stat-card__change--up">+14.2%</p>
+          <div class="stat-card__bar"><div class="stat-card__bar-fill" style="width: 72%"></div></div>
+        </div>
+        <div class="stat-card">
+          <p class="stat-card__label">Users</p>
+          <p class="stat-card__value">2,845</p>
+          <p class="stat-card__change stat-card__change--up">+8.1%</p>
+          <div class="stat-card__bar"><div class="stat-card__bar-fill" style="width: 58%"></div></div>
+        </div>
+        <div class="stat-card">
+          <p class="stat-card__label">Orders</p>
+          <p class="stat-card__value">384</p>
+          <p class="stat-card__change stat-card__change--down">-3.2%</p>
+          <div class="stat-card__bar"><div class="stat-card__bar-fill fill--warning" style="width: 45%"></div></div>
+        </div>
+        <div class="stat-card">
+          <p class="stat-card__label">Conv. Rate</p>
+          <p class="stat-card__value">4.6%</p>
+          <p class="stat-card__change stat-card__change--up">+1.8%</p>
+          <div class="stat-card__bar"><div class="stat-card__bar-fill fill--success" style="width: 64%"></div></div>
+        </div>
+      </div>
+
+      <!-- Objectives / Progress -->
+      <div class="progress-card section-gap">
+        <div class="progress-card__header">
+          <h3 class="progress-card__title">Objectives</h3>
+          <a href="#" class="progress-card__link">This Month</a>
+        </div>
+        <div class="progress-item">
+          <span class="progress-item__label">Page Views</span>
+          <div class="progress-item__bar"><div class="progress-item__bar-fill fill--primary" style="width: 86%"></div></div>
+          <span class="progress-item__value">86%</span>
+        </div>
+        <div class="progress-item">
+          <span class="progress-item__label">Business Leads</span>
+          <div class="progress-item__bar"><div class="progress-item__bar-fill fill--success" style="width: 42%"></div></div>
+          <span class="progress-item__value">42%</span>
+        </div>
+        <div class="progress-item">
+          <span class="progress-item__label">Ad Revenue</span>
+          <div class="progress-item__bar"><div class="progress-item__bar-fill fill--danger" style="width: 64%"></div></div>
+          <span class="progress-item__value">64%</span>
+        </div>
+        <div class="progress-item">
+          <span class="progress-item__label">Engagement</span>
+          <div class="progress-item__bar"><div class="progress-item__bar-fill fill--warning" style="width: 55%"></div></div>
+          <span class="progress-item__value">55%</span>
+        </div>
+      </div>
+
+      <!-- Feed Section -->
+      <p class="section-label">Latest Updates</p>
+      <div class="chip-row section-gap">
+        <span class="chip chip--active">All</span>
+        <span class="chip">Insights</span>
+        <span class="chip">Blog</span>
+        <span class="chip">Product</span>
+        <span class="chip">Updates</span>
+      </div>
+
+      <div class="feed-card section-gap">
+        <div class="feed-card__image">
+          <span class="feed-card__badge badge--insight">Insight</span>
+        </div>
+        <div class="feed-card__body">
+          <h4 class="feed-card__title">Connection Builds Trust</h4>
+          <p class="feed-card__desc">Building meaningful relationships with your users leads to lasting growth and retention.</p>
+          <div class="feed-card__footer">
+            <span class="feed-card__author">
+              <span class="avatar-sm" style="width:24px;height:24px;font-size:10px;">SA</span>
+              Sophie Asveld
+            </span>
+            <a href="#" class="feed-card__read">
+              Read
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-card section-gap">
+        <div class="feed-card__image feed-card__image--alt">
+          <span class="feed-card__badge badge--blog">Blog</span>
+        </div>
+        <div class="feed-card__body">
+          <h4 class="feed-card__title">Triple Your Results Without Too Many Tools</h4>
+          <p class="feed-card__desc">Focus on the essentials and avoid tool fatigue to maximize your team's productivity.</p>
+          <div class="feed-card__footer">
+            <span class="feed-card__author">
+              <span class="avatar-sm" style="width:24px;height:24px;font-size:10px;">EG</span>
+              Erin Green
+            </span>
+            <a href="#" class="feed-card__read">
+              Read
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN: SEARCH
+       ========================================== -->
+  <div class="screen" id="screen-search">
+    <div class="content">
+
+      <div class="search-box">
+        <span class="search-box__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </span>
+        <input type="text" class="form-input" placeholder="Search projects, people, tasks..." value="">
+        <button class="search-box__clear" aria-label="Clear">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>
+        </button>
+      </div>
+
+      <p class="section-label mb-16">Recent</p>
+
+      <div class="list-card section-gap">
+        <div class="list-item">
+          <div class="list-item__avatar" style="background: #3E7BFA;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="list-item__content">
+            <p class="list-item__title">Dashboard Redesign</p>
+            <p class="list-item__subtitle">Updated 2 hours ago</p>
+          </div>
+          <div class="list-item__trail">
+            <span class="badge badge--info">Active</span>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-item__avatar" style="background: #2ECC71;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
+          </div>
+          <div class="list-item__content">
+            <p class="list-item__title">User Research Sessions</p>
+            <p class="list-item__subtitle">5 participants scheduled</p>
+          </div>
+          <div class="list-item__trail">
+            <span class="badge badge--success">Done</span>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-item__avatar" style="background: #F5A623;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <div class="list-item__content">
+            <p class="list-item__title">Component Library</p>
+            <p class="list-item__subtitle">12 new components</p>
+          </div>
+          <div class="list-item__trail">
+            <span class="badge badge--warning">Review</span>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-item__avatar" style="background: #F45252;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="list-item__content">
+            <p class="list-item__title">Bug: Login Flow</p>
+            <p class="list-item__subtitle">Critical — reported yesterday</p>
+          </div>
+          <div class="list-item__trail">
+            <span class="badge badge--danger">Urgent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Accordion -->
+      <p class="section-label mb-16">Help & FAQ</p>
+      <div class="accordion section-gap">
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="true" onclick="toggleAccordion(this)">
+            How do I create a new project?
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-panel open">
+            Navigate to your dashboard and click the "New Project" button in the top-right corner. Fill in the project name, description, and assign team members. Your project will appear in the sidebar immediately.
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)">
+            Can I export my data?
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-panel">
+            Yes, you can export all your project data as CSV or PDF from the Settings page. Go to Settings > Data > Export and choose your preferred format.
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)">
+            How do I invite team members?
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-panel">
+            Open your project settings and go to the "Members" tab. Click "Invite" and enter their email address. They will receive an invitation link to join your workspace.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN: PROFILE
+       ========================================== -->
+  <div class="screen" id="screen-profile">
+    <div class="content">
+
+      <div class="profile-header">
+        <div class="profile-avatar">AF</div>
+        <h2 class="profile-name">Anders Filtenborg</h2>
+        <p class="profile-role">Product Designer</p>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <p class="profile-stat__value">128</p>
+            <p class="profile-stat__label">Projects</p>
+          </div>
+          <div class="profile-stat">
+            <p class="profile-stat__value">512</p>
+            <p class="profile-stat__label">Tasks</p>
+          </div>
+          <div class="profile-stat">
+            <p class="profile-stat__value">96%</p>
+            <p class="profile-stat__label">Complete</p>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn--primary btn--md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Profile
+          </button>
+          <button class="btn btn--secondary btn--md">Share</button>
+        </div>
+      </div>
+
+      <!-- Settings List -->
+      <p class="section-label mb-16">Settings</p>
+      <div class="settings-card section-gap">
+        <div class="settings-item">
+          <div class="settings-item__icon settings-item__icon--blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </div>
+          <div class="settings-item__content">
+            <p class="settings-item__title">Notifications</p>
+            <p class="settings-item__desc">Push and email alerts</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle__track"></span>
+          </label>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item__icon settings-item__icon--green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div class="settings-item__content">
+            <p class="settings-item__title">Privacy</p>
+            <p class="settings-item__desc">Profile visibility settings</p>
+          </div>
+          <span class="settings-item__trail">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item__icon settings-item__icon--orange">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </div>
+          <div class="settings-item__content">
+            <p class="settings-item__title">Preferences</p>
+            <p class="settings-item__desc">Language, theme, display</p>
+          </div>
+          <span class="settings-item__trail">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item__icon settings-item__icon--blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </div>
+          <div class="settings-item__content">
+            <p class="settings-item__title">Dark Mode</p>
+            <p class="settings-item__desc">Switch to dark theme</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox">
+            <span class="toggle__track"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Form Section -->
+      <p class="section-label mb-16">Quick Feedback</p>
+      <div class="settings-card section-gap" style="padding: var(--space-3);">
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <div class="input-with-icon">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" class="form-input" value="Anders Filtenborg">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-with-icon">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+            <input type="email" class="form-input form-input--error" value="anders@email">
+          </div>
+          <p class="form-assistive form-assistive--error">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>
+            This email address doesn't look right
+          </p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea class="form-input" style="height: 80px; padding-top: 12px; resize: vertical;" placeholder="Tell us what you think..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rating</label>
+          <div class="slider-group">
+            <div class="slider-header">
+              <span class="slider-label">Satisfaction</span>
+              <span class="slider-value">75%</span>
+            </div>
+            <input type="range" min="0" max="100" value="75">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: var(--space-2);">
+          <label class="checkbox-label">
+            <input type="checkbox" checked>
+            <span class="checkbox-custom">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            I agree to the terms of service
+          </label>
+        </div>
+        <button class="btn btn--primary btn--lg btn--full mt-16">Submit Feedback</button>
+      </div>
+
+      <!-- Warning Alert -->
+      <div class="alert alert--warning section-gap">
+        <span class="alert__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        <span class="alert__text">Your subscription renews in 3 days.</span>
+        <button class="alert__dismiss" aria-label="Dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Danger button row -->
+      <p class="section-label mb-16">Account</p>
+      <div class="btn-row section-gap">
+        <button class="btn btn--secondary btn--md" style="flex:1;">Log Out</button>
+        <button class="btn btn--danger btn--md" style="flex:1;">Delete Account</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN: COMPONENTS SHOWCASE
+       ========================================== -->
+  <div class="screen" id="screen-components">
+    <div class="content">
+      <p class="section-label">Component Showcase</p>
+      <h2 class="section-title">UI Elements</h2>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab tab--active">Buttons</button>
+        <button class="tab">Badges</button>
+        <button class="tab">Controls</button>
+      </div>
+
+      <!-- Buttons showcase -->
+      <p class="section-label mb-16">Primary</p>
+      <div class="btn-row mb-24">
+        <button class="btn btn--primary btn--sm">Small</button>
+        <button class="btn btn--primary btn--md">Medium</button>
+        <button class="btn btn--primary btn--lg">Large</button>
+      </div>
+
+      <p class="section-label mb-16">Secondary</p>
+      <div class="btn-row mb-24">
+        <button class="btn btn--secondary btn--sm">Small</button>
+        <button class="btn btn--secondary btn--md">Medium</button>
+        <button class="btn btn--secondary btn--lg">Large</button>
+      </div>
+
+      <p class="section-label mb-16">Ghost & Disabled</p>
+      <div class="btn-row mb-24">
+        <button class="btn btn--ghost btn--md">Ghost</button>
+        <button class="btn btn--disabled btn--md">Disabled</button>
+      </div>
+
+      <p class="section-label mb-16">Semantic</p>
+      <div class="btn-row mb-24">
+        <button class="btn btn--md" style="background: var(--color-success); color: white;">Apply</button>
+        <button class="btn btn--danger btn--md">Delete</button>
+      </div>
+
+      <p class="section-label mb-16">Icon + Text</p>
+      <div class="btn-row mb-24">
+        <button class="btn btn--primary btn--md">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Create
+        </button>
+        <button class="btn btn--primary btn--md">
+          Download
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+      </div>
+
+      <p class="section-label mb-16">Full Width CTA (Mobile)</p>
+      <button class="btn btn--primary btn--lg btn--full mb-24">Main CTA Button</button>
+
+      <!-- Badges -->
+      <p class="section-label mb-16">Badges</p>
+      <div class="btn-row mb-24" style="gap: var(--space-2);">
+        <span class="badge badge--info">Info</span>
+        <span class="badge badge--success">Success</span>
+        <span class="badge badge--warning">Warning</span>
+        <span class="badge badge--danger">Danger</span>
+      </div>
+
+      <!-- Selection Controls -->
+      <p class="section-label mb-16">Selection Controls</p>
+      <div class="settings-card" style="padding: var(--space-3);">
+        <div style="display:flex; flex-direction:column; gap: var(--space-3);">
+          <label class="checkbox-label">
+            <input type="checkbox" checked>
+            <span class="checkbox-custom">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Checkbox — Active
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox">
+            <span class="checkbox-custom">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Checkbox — Inactive
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="demo" checked>
+            <span class="radio-custom"></span>
+            Radio — Selected
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="demo">
+            <span class="radio-custom"></span>
+            Radio — Unselected
+          </label>
+          <div style="display:flex; align-items:center; gap: var(--space-2);">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle__track"></span>
+            </label>
+            <span style="font-size:14px;">Toggle — On</span>
+          </div>
+          <div style="display:flex; align-items:center; gap: var(--space-2);">
+            <label class="toggle">
+              <input type="checkbox">
+              <span class="toggle__track"></span>
+            </label>
+            <span style="font-size:14px;">Toggle — Off</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-24"></div>
+
+      <!-- Alerts showcase -->
+      <p class="section-label mb-16">Alerts</p>
+      <div class="alert alert--info mb-16">
+        <span class="alert__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3E7BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </span>
+        <span class="alert__text">Neutral info displayed here. Carry on.</span>
+      </div>
+      <div class="alert alert--success mb-16">
+        <span class="alert__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2ECC71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </span>
+        <span class="alert__text">A successful message appears to those who did well.</span>
+      </div>
+      <div class="alert mb-16" style="background: var(--color-danger-bg); border-left-color: var(--color-danger);">
+        <span class="alert__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F45252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>
+        </span>
+        <span class="alert__text">An error message displayed when something went wrong.</span>
+      </div>
+      <div class="alert alert--warning section-gap">
+        <span class="alert__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        <span class="alert__text">Warning text here so you can be more careful.</span>
+      </div>
+
+      <!-- Icons Showcase -->
+      <p class="section-label mb-16">Status Icons</p>
+      <div class="settings-card mb-24" style="padding: var(--space-3);">
+        <div class="icon-grid icon-grid--status">
+          <div class="icon-cell icon-cell--info">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>Info</span>
+          </div>
+          <div class="icon-cell icon-cell--warning">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Warning</span>
+          </div>
+          <div class="icon-cell icon-cell--danger">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>
+            <span>Error</span>
+          </div>
+          <div class="icon-cell icon-cell--success">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Success</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label mb-16">Essentials</p>
+      <div class="settings-card mb-24" style="padding: var(--space-3);">
+        <div class="icon-grid">
+          <!-- Row 1 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Remove</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Check</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span>Close</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            <span>Delete</span>
+          </div>
+          <!-- Row 2 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            <span>More</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            <span>Vertical</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <span>Heart</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Play</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+          </div>
+          <!-- Row 3 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>View</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>User</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span>Chat</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span>Lock</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span>Bell</span>
+          </div>
+          <!-- Row 4 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 004 4h12"/></svg>
+            <span>Share</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+            <span>Inbox</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Upload</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Document</span>
+          </div>
+          <!-- Row 5 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <span>Layout</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            <span>Folder</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span>Edit</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span>Text</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Grid</span>
+          </div>
+          <!-- Row 6 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <span>Menu</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            <span>Sliders</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>Settings</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Location</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Logout</span>
+          </div>
+          <!-- Row 7 -->
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <span>Login</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Home</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Calendar</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span>Mail</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <span>Layers</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Match stick -->
+              <line x1="12" y1="14" x2="12" y2="22"/>
+              <!-- Match head -->
+              <ellipse cx="12" cy="13.5" rx="1.8" ry="1.2"/>
+              <!-- Flame outer -->
+              <path d="M12 3C9.5 6 9 8 9 9.5C9 11.5 10.3 13 12 13C13.7 13 15 11.5 15 9.5C15 8 14.5 6 12 3z"/>
+              <!-- Flame inner -->
+              <path d="M12 7C11 8.5 10.8 9.5 10.8 10.2C10.8 11.2 11.3 12 12 12C12.7 12 13.2 11.2 13.2 10.2C13.2 9.5 13 8.5 12 7z"/>
+            </svg>
+            <span>Match</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label mb-16">Loaders</p>
+      <div class="settings-card section-gap" style="padding: var(--space-3);">
+        <div class="icon-grid icon-grid--loaders">
+          <div class="icon-cell">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-disabled)" stroke-width="2" stroke-linecap="round"><path d="M12 2a10 10 0 010 20" stroke="var(--color-primary)"/><path d="M12 22a10 10 0 010-20" opacity="0.2"/></svg>
+            <span>Spinner</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2" fill="var(--color-primary)" opacity="0.3"/><circle cx="12" cy="12" r="2" fill="var(--color-primary)" opacity="0.6"/><circle cx="18" cy="12" r="2" fill="var(--color-primary)"/></svg>
+            <span>Dots</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="1.5" fill="var(--color-primary)"/><circle cx="17.66" cy="6.34" r="1.5" fill="var(--color-primary)" opacity="0.85"/><circle cx="20" cy="12" r="1.5" fill="var(--color-primary)" opacity="0.7"/><circle cx="17.66" cy="17.66" r="1.5" fill="var(--color-primary)" opacity="0.55"/><circle cx="12" cy="20" r="1.5" fill="var(--color-primary)" opacity="0.4"/><circle cx="6.34" cy="17.66" r="1.5" fill="var(--color-primary)" opacity="0.3"/><circle cx="4" cy="12" r="1.5" fill="var(--color-primary)" opacity="0.2"/><circle cx="6.34" cy="6.34" r="1.5" fill="var(--color-primary)" opacity="0.1"/></svg>
+            <span>Radial</span>
+          </div>
+          <div class="icon-cell">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="10" width="4" height="4" rx="1" fill="var(--color-primary)" opacity="0.4"/><rect x="10" y="10" width="4" height="4" rx="1" fill="var(--color-primary)" opacity="0.7"/><rect x="18" y="10" width="4" height="4" rx="1" fill="var(--color-primary)"/></svg>
+            <span>Blocks</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       BOTTOM NAVIGATION
+       ========================================== -->
+    </div><!-- end .app -->
+
+    <nav class="bottom-nav">
+      <a href="#" class="bottom-nav__item bottom-nav__item--active" onclick="showScreen('home'); setActiveNav(this); return false;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+      <a href="#" class="bottom-nav__item" onclick="showScreen('search'); setActiveNav(this); return false;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Search
+      </a>
+      <a href="#" class="bottom-nav__item" onclick="showScreen('components'); setActiveNav(this); return false;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Components
+      </a>
+      <a href="#" class="bottom-nav__item" onclick="showScreen('profile'); setActiveNav(this); return false;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+    </nav>
+    <div class="phone-home-indicator"></div>
+  </div><!-- end .phone-screen -->
+</div><!-- end .phone-frame -->
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelector('.app').scrollTo(0, 0);
+}
+
+function setActiveNav(el) {
+  document.querySelectorAll('.bottom-nav__item').forEach(i => i.classList.remove('bottom-nav__item--active'));
+  el.classList.add('bottom-nav__item--active');
+}
+
+function toggleAccordion(trigger) {
+  const panel = trigger.nextElementSibling;
+  const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+  trigger.setAttribute('aria-expanded', !isOpen);
+  panel.classList.toggle('open');
+}
+</script>
+</body>
+</html>
