@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote-to-Cash Automated Generator Tool</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: #f5f5f7; color: #1d1d1f; line-height: 1.5; }
+
+  .page-header { padding: 48px 40px 0; display: flex; align-items: center; justify-content: space-between; }
+  .page-header h1 { font-size: 32px; font-weight: 600; color: #af1917; }
+  .page-header .logo { height: 40px; }
+
+  .flow-container { padding: 48px 40px; overflow-x: auto; }
+  .flow-label { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #86868b; margin-bottom: 24px; }
+
+  .flow { display: flex; align-items: stretch; gap: 0; min-width: 1100px; }
+
+  .arrow {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; min-width: 48px; color: #86868b; font-size: 24px; flex-shrink: 0;
+  }
+  .arrow span { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .arrow .data-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #af1917; font-weight: 600; max-width: 60px; text-align: center; line-height: 1.2; }
+
+  .step {
+    flex: 1; min-width: 180px; background: #fff; border-radius: 16px;
+    border: 2px solid #e5e5e5; cursor: pointer; transition: all 0.25s ease;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .step:hover { border-color: #af1917; box-shadow: 0 4px 24px rgba(0,113,227,0.12); transform: translateY(-2px); }
+  .step.active { border-color: #af1917; box-shadow: 0 4px 24px rgba(0,113,227,0.18); }
+
+  .step-header { padding: 20px 20px 16px; border-bottom: 1px solid #f0f0f0; }
+  .step-number { font-size: 11px; font-weight: 700; color: #fff; background: #af1917; border-radius: 6px; padding: 2px 8px; display: inline-block; margin-bottom: 8px; height: 20px; }
+  .step-name { font-size: 18px; font-weight: 600; margin-bottom: 2px; height: 54px; display: flex; align-items: flex-start; }
+  .step-name-en { font-size: 12px; color: #86868b; height: 18px; }
+
+  .step-body { padding: 16px 20px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .step-body .customer-count { font-size: 12px; color: #86868b; }
+  .step-body .status-counts { font-size: 11px; color: #86868b; display: flex; flex-direction: column; gap: 2px; }
+  .step-body .status-counts span { display: flex; align-items: center; gap: 4px; }
+  .step-body .status-counts .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .step-body .status-counts .dot-waiting { background: #e65100; }
+  .step-body .status-counts .dot-customer { background: #1565c0; }
+  .step-body .status-counts .dot-accepted { background: #2e7d32; }
+
+  /* Detail panel */
+  .detail-panel {
+    background: #fff; margin: 0 40px 48px; border-radius: 16px; padding: 40px;
+    border: 2px solid #af1917; display: none;
+  }
+  .detail-panel.visible { display: block; }
+  .detail-panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 24px; }
+
+  /* Customer list in detail panel */
+  .customer-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .customer-group { border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+  .customer-group-header { padding: 10px 14px; background: #f5f5f7; font-size: 14px; font-weight: 600; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 8px; }
+  .customer-group-header .order-count { font-size: 11px; font-weight: 600; color: #76777a; }
+  .customer-group-orders { display: flex; flex-direction: column; }
+  .customer-row {
+    display: grid; grid-template-columns: 1fr auto auto auto auto; align-items: center; gap: 8px; padding: 10px 14px;
+    background: #fff; font-size: 13px; border-bottom: 1px solid #f0e0e0;
+  }
+  .customer-row:last-child { border-bottom: none; }
+  .customer-row a { color: #af1917; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+  .customer-row a:hover { text-decoration: underline; }
+  .customer-row .delete-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #86868b; padding: 4px; transition: color 0.15s; }
+  .customer-row .delete-btn:hover { color: #ff3b30; }
+  .customer-row .ping-btn {
+    background: none; border: 1px solid #76777a; border-radius: 6px; cursor: pointer;
+    font-size: 11px; padding: 3px 8px; color: #76777a; font-weight: 600; white-space: nowrap; transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .customer-row .ping-btn:hover { border-color: #af1917; color: #af1917; }
+  .ping-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%; background: #af1917; color: #fff;
+    font-size: 10px; font-weight: 700;
+  }
+
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: #2e7d32; color: #fff; padding: 14px 28px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease; z-index: 999; pointer-events: none;
+  }
+  .toast.visible { transform: translateX(-50%) translateY(0); }
+  .customer-row .status-select {
+    font-size: 11px; padding: 3px 6px; border-radius: 6px; border: 1px solid #e5e5e5;
+    background: #fff; color: #1d1d1f; cursor: pointer; font-weight: 600;
+  }
+  .status-waiting { background: #fff3e0 !important; color: #e65100 !important; border-color: #ffcc80 !important; }
+  .status-customer { background: #e3f2fd !important; color: #1565c0 !important; border-color: #90caf9 !important; }
+  .status-accepted { background: #e8f5e9 !important; color: #2e7d32 !important; border-color: #a5d6a7 !important; }
+
+  /* New customer button */
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
+  .btn-primary { background: #af1917; color: #fff; }
+  .btn-primary:hover { background: #8a1412; }
+  .btn-secondary { background: #e5e5e5; color: #1d1d1f; }
+  .btn-secondary:hover { background: #d5d5d5; }
+
+  /* Form */
+  .form-area { display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e5e5; }
+  .form-area.visible { display: block; }
+  .form-area h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input { padding: 8px 12px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .form-group input:focus { outline: none; border-color: #af1917; }
+
+  /* Items table */
+  .items-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .items-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #86868b; text-align: left; padding: 8px; border-bottom: 2px solid #e5e5e5; }
+  .items-table td { padding: 4px 8px; }
+  .items-table input { width: 100%; padding: 6px 8px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 13px; font-family: inherit; }
+  .items-table input:focus { outline: none; border-color: #af1917; }
+  .items-table .remove-row { background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 18px; padding: 4px; }
+
+  .form-actions { display: flex; gap: 12px; margin-top: 16px; }
+
+  .footer { padding: 24px 40px; text-align: center; color: #86868b; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Quote-to-Cash Automated Generator Tool</h1>
+  <img class="logo" src="https://hovmand.com/static/version1774259779/frontend/Vaimo/hovmand/da_DK/images/logo.svg" alt="Hovmand A/S">
+</div>
+
+<div class="flow-container">
+  <div class="flow-label">Procesflow — klik på et trin</div>
+  <div class="flow">
+
+    <div class="step" data-step="0" onclick="openStep(0)">
+      <div class="step-header">
+        <div class="step-number">TRIN 1</div>
+        <div class="step-name">Salgstilbud (SQ)</div>
+        <div class="step-name-en">Sales Quote</div>
+      </div>
+      <div class="step-body">
+        <div class="customer-count" id="count-0">0 kunder</div>
+        <div class="status-counts" id="statuses-0"></div>
+      </div>
+    </div>
+
+    <div class="arrow"><span>→</span></div>
+
+    <div class="step" data-step="1" onclick="openStep(1)">
+      <div class="step-header">
+        <div class="step-number">TRIN 2</div>
+        <div class="step-name">Indkøbsordre (P/O)</div>
+        <div class="step-name-en">Purchase Order</div>
+      </div>
+      <div class="step-body">
+        <div class="customer-count" id="count-1">0 kunder</div>
+        <div class="status-counts" id="statuses-1"></div>
+      </div>
+    </div>
+
+    <div class="arrow"><span>→</span></div>
+
+    <div class="step" data-step="2" onclick="openStep(2)">
+      <div class="step-header">
+        <div class="step-number">TRIN 3</div>
+        <div class="step-name">Salgsaftale</div>
+        <div class="step-name-en">Sales Agreement</div>
+      </div>
+      <div class="step-body">
+        <div class="customer-count" id="count-2">0 kunder</div>
+        <div class="status-counts" id="statuses-2"></div>
+      </div>
+    </div>
+
+    <div class="arrow"><span>→</span></div>
+
+    <div class="step" data-step="3" onclick="openStep(3)">
+      <div class="step-header">
+        <div class="step-number">TRIN 4</div>
+        <div class="step-name">Produktionsordre</div>
+        <div class="step-name-en">Production Order / BOM</div>
+      </div>
+      <div class="step-body">
+        <div class="customer-count" id="count-3">0 kunder</div>
+        <div class="status-counts" id="statuses-3"></div>
+      </div>
+    </div>
+
+    <div class="arrow"><span>→</span></div>
+
+    <div class="step" data-step="4" onclick="openStep(4)">
+      <div class="step-header">
+        <div class="step-number">TRIN 5</div>
+        <div class="step-name">Faktura & Følgeseddel</div>
+        <div class="step-name-en">Invoice & Packing Slip</div>
+      </div>
+      <div class="step-body">
+        <div class="customer-count" id="count-4">0 kunder</div>
+        <div class="status-counts" id="statuses-4"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="padding: 0 40px 24px;">
+  <button class="btn btn-primary" onclick="showForm()">+ Ny kunde</button>
+</div>
+
+<!-- Form area between button and detail panel -->
+<div class="form-area" id="form-area" style="margin: 0 40px 24px; background: #fff; border-radius: 16px; padding: 40px; border: 2px solid #e5e5e5;">
+  <h3>Opret ny kunde</h3>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Kundenavn</label>
+      <input type="text" id="f-name" placeholder="Bygma Hillerød">
+    </div>
+    <div class="form-group">
+      <label>Adresse</label>
+      <input type="text" id="f-addr" placeholder="Roskildevej 100">
+    </div>
+    <div class="form-group">
+      <label>By + postnr.</label>
+      <input type="text" id="f-city" placeholder="3400 Hillerød">
+    </div>
+    <div class="form-group">
+      <label>Dato</label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="form-group">
+      <label>Dokument nr.</label>
+      <input type="text" id="f-docno" placeholder="0043">
+    </div>
+    <div class="form-group">
+      <label>Ordre reference</label>
+      <input type="text" id="f-orderref" placeholder="Lagerhal Køge">
+    </div>
+    <div class="form-group">
+      <label>Betalingsbetingelser</label>
+      <input type="text" id="f-terms" value="30 dage netto">
+    </div>
+    <div class="form-group">
+      <label>Ansvarlig (navn)</label>
+      <input type="text" id="f-responsible" placeholder="Jens Hansen">
+    </div>
+    <div class="form-group">
+      <label>Ansvarlig (email)</label>
+      <input type="email" id="f-email" placeholder="navn@hovmand.com">
+    </div>
+  </div>
+
+  <h4 style="font-size:13px;font-weight:600;margin-bottom:8px;">Linjer</h4>
+    <table class="items-table">
+      <thead>
+        <tr><th>Beskrivelse</th><th>Varenr.</th><th>Antal</th><th>Pris (DKK)</th><th></th></tr>
+      </thead>
+      <tbody id="items-body">
+        <tr>
+          <td><input type="text" data-field="desc"></td>
+          <td><input type="text" data-field="itemNo"></td>
+          <td><input type="text" data-field="qty"></td>
+          <td><input type="text" data-field="price"></td>
+          <td><button class="remove-row" onclick="removeRow(this)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-secondary" onclick="addRow()" style="font-size:12px;padding:6px 14px;">+ Tilføj linje</button>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="generatePdf()">Tilføj kunde / ordre</button>
+      <button class="btn btn-secondary" onclick="hideForm()">Annuller</button>
+      <span id="form-status" style="font-size:13px;color:#86868b;align-self:center;"></span>
+    </div>
+</div>
+
+<!-- Detail panel, content changes per step -->
+<div class="detail-panel" id="detail-panel">
+  <h2 id="panel-title"></h2>
+  <div class="customer-list" id="customer-list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="footer">
+  Hovmand A/S — Quote-to-Cash Automated Generator Tool — 2026
+</div>
+
+<script>
+const STEP_NAMES = [
+  'Salgstilbud', 'Indkøbsordre', 'Salgsaftale', 'Produktionsordre', 'Faktura & Følgeseddel'
+];
+const STEP_TITLES = [
+  'Trin 1: Salgstilbud (SQ)', 'Trin 2: Indkøbsordre (P/O)', 'Trin 3: Salgsaftale',
+  'Trin 4: Produktionsordre', 'Trin 5: Faktura & Følgeseddel'
+];
+
+let currentStep = null;
+
+// Load customers from localStorage
+function getCustomers() {
+  return JSON.parse(localStorage.getItem('qtc-customers') || '{}');
+}
+function saveCustomers(data) {
+  localStorage.setItem('qtc-customers', JSON.stringify(data));
+}
+
+// Seed customers if no data exists
+const SLUG_MAP = {
+  'Bygma Hillerød': 'bygma-hillerd',
+  'Novo Nordisk': 'novo-nordisk',
+  'DSV Logistics': 'dsv-logistics',
+  'Carlsberg Brewery': 'carlsberg-brewery',
+};
+const ORDER_SLUG_MAP = {
+  'Lagerhal Køge': 'lagerhal-kge',
+  'Kalundborg Produktion': 'kalundborg-produktion',
+  'Bagsværd Lager': 'bagsvrd-lager',
+  'Hillerød Cleanroom': 'hillerd-cleanroom',
+  'Hedehusene Terminal': 'hedehusene-terminal',
+  'Horsens Distribution': 'horsens-distribution',
+  'Fredericia Tapning': 'fredericia-tapning',
+  'København Palletering': 'kbenhavn-palletering',
+  'Odense Råvarelager': 'odense-ravarelager',
+  'Faxe Emballage': 'faxe-emballage',
+};
+const STEP_SLUGS = ['salgstilbud','indkoebsordre','salgsaftale','produktionsordre','faktura-foelgeseddel'];
+
+function seedData() {
+  let customers = getCustomers();
+  if (Object.keys(customers).length === 0) {
+    const seed = [
+      { name: 'Bygma Hillerød', orderRef: 'Lagerhal Køge', responsible: 'Lars Petersen', email: 'lars@bygma.dk', status: 'accepted' },
+      { name: 'Novo Nordisk', orderRef: 'Kalundborg Produktion', responsible: 'Mette Andersen', email: 'mtan@novonordisk.com', status: 'waiting' },
+      { name: 'Novo Nordisk', orderRef: 'Bagsværd Lager', responsible: 'Mette Andersen', email: 'mtan@novonordisk.com', status: 'customer' },
+      { name: 'Novo Nordisk', orderRef: 'Hillerød Cleanroom', responsible: 'Søren Kirk', email: 'soki@novonordisk.com', status: 'waiting' },
+      { name: 'DSV Logistics', orderRef: 'Hedehusene Terminal', responsible: 'Henrik Møller', email: 'hm@dsv.com', status: 'customer' },
+      { name: 'DSV Logistics', orderRef: 'Horsens Distribution', responsible: 'Henrik Møller', email: 'hm@dsv.com', status: 'waiting' },
+      { name: 'Carlsberg Brewery', orderRef: 'Fredericia Tapning', responsible: 'Anne Bjørn', email: 'anne.bjorn@carlsberg.com', status: 'accepted' },
+      { name: 'Carlsberg Brewery', orderRef: 'København Palletering', responsible: 'Anne Bjørn', email: 'anne.bjorn@carlsberg.com', status: 'waiting' },
+      { name: 'Carlsberg Brewery', orderRef: 'Odense Råvarelager', responsible: 'Kasper Holm', email: 'kasper.holm@carlsberg.com', status: 'customer' },
+      { name: 'Carlsberg Brewery', orderRef: 'Faxe Emballage', responsible: 'Kasper Holm', email: 'kasper.holm@carlsberg.com', status: 'waiting' },
+    ];
+    for (let i = 0; i < 5; i++) {
+      customers[i] = seed.map(s => {
+        const cs = SLUG_MAP[s.name];
+        const os = ORDER_SLUG_MAP[s.orderRef];
+        const file = `documenter/${i+1}-${STEP_SLUGS[i]}-${cs}-${os}.pdf`;
+        return {
+          name: s.name, orderRef: s.orderRef, file: file,
+          status: s.status, responsible: s.responsible, email: s.email,
+        };
+      });
+    }
+    saveCustomers(customers);
+  }
+}
+
+function updateCounts() {
+  const customers = getCustomers();
+  for (let i = 0; i < 5; i++) {
+    const list = customers[i] || [];
+    const uniqueNames = [...new Set(list.map(c => c.name))];
+    const el = document.getElementById('count-' + i);
+    el.textContent = uniqueNames.length + (uniqueNames.length === 1 ? ' kunde' : ' kunder') + (list.length > uniqueNames.length ? ` (${list.length} ordrer)` : '');
+
+    const waiting = list.filter(c => c.status === 'waiting').length;
+    const inCustomer = list.filter(c => c.status === 'customer').length;
+    const accepted = list.filter(c => c.status === 'accepted').length;
+    const statusEl = document.getElementById('statuses-' + i);
+    let html = '';
+    if (waiting) html += `<span><span class="dot dot-waiting"></span>${waiting} afventer</span>`;
+    if (inCustomer) html += `<span><span class="dot dot-customer"></span>${inCustomer} hos kunde</span>`;
+    if (accepted) html += `<span><span class="dot dot-accepted"></span>${accepted} godkendt</span>`;
+    statusEl.innerHTML = html;
+  }
+}
+
+function openStep(index) {
+  currentStep = index;
+  // Highlight active step
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.querySelector('.step[data-step="' + index + '"]').classList.add('active');
+
+  // Show panel
+  const panel = document.getElementById('detail-panel');
+  panel.classList.add('visible');
+  document.getElementById('panel-title').textContent = STEP_TITLES[index];
+
+  // Render customer list
+  renderCustomerList(index);
+
+  // Hide form
+  hideForm();
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderCustomerList(step) {
+  const customers = getCustomers();
+  const list = customers[step] || [];
+  const container = document.getElementById('customer-list');
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    container.innerHTML = '<p style="font-size:13px;color:#86868b;">Ingen kunder endnu.</p>';
+    return;
+  }
+
+  // Group by customer name
+  const groups = {};
+  list.forEach((c, idx) => {
+    if (!groups[c.name]) groups[c.name] = [];
+    groups[c.name].push({ ...c, idx });
+  });
+
+  Object.entries(groups).forEach(([name, orders]) => {
+    const group = document.createElement('div');
+    group.className = 'customer-group';
+
+    const header = document.createElement('div');
+    header.className = 'customer-group-header';
+    header.innerHTML = `${name} <span class="order-count">${orders.length} ${orders.length === 1 ? 'ordre' : 'ordrer'}</span>`;
+    group.appendChild(header);
+
+    const ordersDiv = document.createElement('div');
+    ordersDiv.className = 'customer-group-orders';
+
+    orders.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'customer-row';
+      const statusClass = {waiting:'status-waiting', customer:'status-customer', accepted:'status-accepted'}[c.status] || 'status-waiting';
+      const orderLabel = c.orderRef ? c.orderRef : STEP_NAMES[step];
+      row.innerHTML = `
+        <a href="${c.file}" target="_blank">📄 ${orderLabel}</a>
+        <select class="status-select ${statusClass}" onchange="changeStatus(${step}, ${c.idx}, this)">
+          <option value="waiting" ${c.status==='waiting'?'selected':''}>Waiting for action</option>
+          <option value="customer" ${c.status==='customer'?'selected':''}>In customer's hands</option>
+          <option value="accepted" ${c.status==='accepted'?'selected':''}>Accepted by customer</option>
+        </select>
+        <button class="ping-btn" onclick="sendReminder(${step}, ${c.idx})">${(c.pings||0) > 0 ? '<span class="ping-count">'+(c.pings||0)+'</span>' : ''}Send påmindelse</button>
+        <button class="delete-btn" onclick="deleteCustomer(${step}, ${c.idx})" title="Slet">🗑</button>
+      `;
+      ordersDiv.appendChild(row);
+    });
+
+    group.appendChild(ordersDiv);
+    container.appendChild(group);
+  });
+}
+
+function changeStatus(step, idx, select) {
+  const customers = getCustomers();
+  customers[step][idx].status = select.value;
+  saveCustomers(customers);
+  select.className = 'status-select';
+  const map = {waiting:'status-waiting', customer:'status-customer', accepted:'status-accepted'};
+  select.classList.add(map[select.value]);
+  updateCounts();
+}
+
+function sendReminder(step, idx) {
+  const customers = getCustomers();
+  const c = customers[step][idx];
+  c.pings = (c.pings || 0) + 1;
+  saveCustomers(customers);
+  const responsible = c.responsible || 'Ansvarlig';
+  const email = c.email || '';
+  showToast(`Påmindelse #${c.pings} sendt til ${responsible}${email ? ' (' + email + ')' : ''}`);
+  renderCustomerList(step);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+function deleteCustomer(step, idx) {
+  if (!confirm('Slet denne kunde og PDF?')) return;
+  const customers = getCustomers();
+  customers[step].splice(idx, 1);
+  saveCustomers(customers);
+  renderCustomerList(step);
+  updateCounts();
+}
+
+function showForm() {
+  document.getElementById('form-area').classList.add('visible');
+  document.getElementById('f-date').valueAsDate = new Date();
+  document.getElementById('form-status').textContent = '';
+}
+function hideForm() {
+  document.getElementById('form-area').classList.remove('visible');
+}
+
+function addRow() {
+  const tbody = document.getElementById('items-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" data-field="desc"></td>
+    <td><input type="text" data-field="itemNo"></td>
+    <td><input type="text" data-field="qty"></td>
+    <td><input type="text" data-field="price"></td>
+    <td><button class="remove-row" onclick="removeRow(this)">×</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+function removeRow(btn) {
+  const tbody = document.getElementById('items-body');
+  if (tbody.rows.length > 1) btn.closest('tr').remove();
+}
+
+function getFormItems() {
+  const rows = document.getElementById('items-body').rows;
+  const items = [];
+  for (const row of rows) {
+    const inputs = row.querySelectorAll('input');
+    items.push({
+      desc: inputs[0].value,
+      itemNo: inputs[1].value,
+      qty: inputs[2].value,
+      price: inputs[3].value,
+    });
+  }
+  return items;
+}
+
+async function generatePdf() {
+  const status = document.getElementById('form-status');
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { status.textContent = 'Udfyld kundenavn.'; return; }
+
+  status.textContent = 'Genererer PDF...';
+
+  const payload = {
+    step: currentStep,
+    customerName: name,
+    customerAddr: document.getElementById('f-addr').value,
+    customerCity: document.getElementById('f-city').value,
+    date: document.getElementById('f-date').value,
+    docNo: document.getElementById('f-docno').value || '0001',
+    paymentTerms: document.getElementById('f-terms').value,
+    items: getFormItems(),
+  };
+
+  try {
+    // Generate PDFs for all 5 steps
+    const customers = getCustomers();
+    for (let step = 0; step < 5; step++) {
+      const stepPayload = { ...payload, step: step };
+      const res = await fetch('/generate-pdf', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(stepPayload),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      if (!customers[step]) customers[step] = [];
+      const responsible = document.getElementById('f-responsible').value.trim();
+      const email = document.getElementById('f-email').value.trim();
+      const orderRef = document.getElementById('f-orderref').value.trim();
+      customers[step].push({ name: name, file: data.filename, status: 'waiting', responsible: responsible, email: email, orderRef: orderRef });
+
+      status.textContent = `Genererer PDF ${step + 1}/5...`;
+    }
+    saveCustomers(customers);
+
+    renderCustomerList(currentStep);
+    updateCounts();
+    hideForm();
+    status.textContent = '';
+
+    // Clear form
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-addr').value = '';
+    document.getElementById('f-city').value = '';
+    document.getElementById('f-docno').value = '';
+    document.getElementById('f-responsible').value = '';
+    document.getElementById('f-email').value = '';
+    document.getElementById('f-orderref').value = '';
+    document.getElementById('items-body').innerHTML = `
+      <tr>
+        <td><input type="text" data-field="desc"></td>
+        <td><input type="text" data-field="itemNo"></td>
+        <td><input type="text" data-field="qty"></td>
+        <td><input type="text" data-field="price"></td>
+        <td><button class="remove-row" onclick="removeRow(this)">×</button></td>
+      </tr>`;
+
+  } catch (e) {
+    status.textContent = 'Fejl: ' + e.message + ' — Kører serveren? (python3 server.py)';
+  }
+}
+
+// Init — clear old data if version changed
+if (localStorage.getItem('qtc-version') !== '3') {
+  localStorage.removeItem('qtc-customers');
+  localStorage.setItem('qtc-version', '3');
+}
+seedData();
+updateCounts();
+</script>
+
+</body>
+</html>
