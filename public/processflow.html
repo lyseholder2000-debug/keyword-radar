@@ -350,7 +350,7 @@ function seedData() {
       customers[i] = seed.map(s => {
         const cs = SLUG_MAP[s.name];
         const os = ORDER_SLUG_MAP[s.orderRef];
-        const file = `documenter/${i+1}-${STEP_SLUGS[i]}-${cs}-${os}.pdf`;
+        const file = `placeholder-pdf.html`;
         return {
           name: s.name, orderRef: s.orderRef, file: file,
           status: s.status, responsible: s.responsible, email: s.email,
