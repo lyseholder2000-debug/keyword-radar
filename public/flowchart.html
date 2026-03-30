@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolicyRadar — Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400&family=Inter:wght@400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: rgb(242, 242, 242);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+  }
+
+  .flow-container {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .step-card {
+    flex: 1;
+    border-radius: 12px;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .step-card:nth-child(1) { background: #ffffff; }
+  .step-card:nth-child(3) { background: #F7F7F7; }
+  .step-card:nth-child(5) { background: #F2F2F2; }
+  .step-card:nth-child(7) { background: #ECECEC; }
+
+  .step-badge {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 12px;
+    color: #222;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #222;
+    line-height: 25.2px;
+  }
+
+  .step-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 19.6px;
+    color: #111111;
+    flex: 1;
+  }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    flex-shrink: 0;
+  }
+
+  .arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 24px 16px; }
+
+    .flow-container {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .arrow {
+      width: 100%;
+      height: 40px;
+      transform: rotate(90deg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="flow-container">
+
+  <div class="step-card">
+    <div class="step-badge">01</div>
+    <div class="step-title">ft.dk API</div>
+    <div class="step-text">Legislative data is pulled directly from the Danish Parliament's open API, providing real-time access to new laws, amendments, and policy proposals as they are published.</div>
+  </div>
+
+  <div class="arrow">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M12 6l4 4-4 4" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="step-card">
+    <div class="step-badge">02</div>
+    <div class="step-title">Tailored Dashboard</div>
+    <div class="step-text">Raw parliamentary data is organized into a personalized dashboard, surfacing only the legislation relevant to your industry, clients, or focus areas.</div>
+  </div>
+
+  <div class="arrow">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M12 6l4 4-4 4" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="step-card">
+    <div class="step-badge">03</div>
+    <div class="step-title">Filter & AI Skills</div>
+    <div class="step-text">AI-powered filters analyze and categorize legislation by impact, urgency, and relevance. Natural language summaries make complex legal text instantly understandable.</div>
+  </div>
+
+  <div class="arrow">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M12 6l4 4-4 4" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="step-card">
+    <div class="step-badge">04</div>
+    <div class="step-title">Communication & Action</div>
+    <div class="step-text">Filtered insights are turned into actionable alerts — email digests, client briefings, or compliance checklists — ensuring timely response to regulatory changes.</div>
+  </div>
+
+</div>
+
+</body>
+</html>
